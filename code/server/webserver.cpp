@@ -120,7 +120,7 @@ void WebServer::Start(){
         }
     }
 }
-
+//!标准的写法是生成503报文
 void WebServer::SendError_(int fd, const char*info){
     assert(fd > 0);
     int ret = send(fd, info, strlen(info), 0);
@@ -149,7 +149,7 @@ void WebServer::AddClient_(int fd, sockaddr_in addr){
     }
     //EPOLLOUT 的触发条件是：TCP 发送缓冲区（Send Buffer）有空位，可以写入数据
     //刚建立连接时，发送缓冲区肯定是空的, 如果你监听了 EPOLLOUT，Epoll 会立刻、马上通知你：“嘿！可以写数据了！”
-    // 但是，你此时根本还没收到客户端的请求，你不知道要写什么（不知道回 200 还是 404）。
+    //但是，你此时根本还没收到客户端的请求，你不知道要写什么（不知道回 200 还是 404）。
     epoller_->AddFd(fd, EPOLLIN | connEvent_);
     SetFdNonblock(fd);
     LOG_INFO("Client[%d] in!", users_[fd].GetFd());

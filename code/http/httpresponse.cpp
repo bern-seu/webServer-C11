@@ -65,17 +65,18 @@ void HttpResponse::Init(const string& srcDir, string& path, bool isKeepAlive, in
 //这是生成响应的主入口函数
 void HttpResponse::MakeResponse(Buffer& buff){
     /* 判断请求的资源文件 */
+    
     //系统调用 stat 会读取磁盘上的文件元数据（大小、权限、类型等）并写入 mmFileStat_
-    if( stat((srcDir_ + path_).data(), &mmFileStat_)<0 || S_ISDIR(mmFileStat_.st_mode) ){
-        code_ = 404;
-    }
-    //检查文件权限 (S_IROTH)。若不可读，状态码设为 403
-    else if(!(mmFileStat_.st_mode & S_IROTH)){
-        code_ = 403;
-    }
-    //若无错误且代码仍为初始值 -1，设为 200 (OK)
-    else if(code_ == -1){
-        code_ = 200;
+    if (code_ < 400) { 
+        if (stat((srcDir_ + path_).data(), &mmFileStat_) < 0 || S_ISDIR(mmFileStat_.st_mode)) {
+            code_ = 404; // 没找到或者是个目录
+        }
+        else if (!(mmFileStat_.st_mode & S_IROTH)) {
+            code_ = 403; // 没权限读
+        }
+        else {
+            code_ = 200; // 文件存在且可读，确认状态为 200
+        }
     }
     //如果状态码是错误的（如 404），将 path_ 修改为对应的错误页面路径（如 /404.html）
     ErrorHtml_();

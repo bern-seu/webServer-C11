@@ -55,6 +55,7 @@ int HttpConn::GetPort() const{
     return addr_.sin_port;
 }
 
+//! 传大文件时可能存在内存耗尽的问题，解决方法：限制最大请求大小、临时文件 (Nginx）
 ssize_t HttpConn::read(int* saveErrno){
     ssize_t len = -1;
     do{
@@ -101,15 +102,24 @@ bool HttpConn::process(){
     if(readBuff_.ReadableBytes() <= 0){
         return false;
     }
-    // 2. 解析 HTTP 请求 (GET /index.html ...)
-    else if(request_.parse(readBuff_)){
+    // 1. 调用 parse
+    bool isValid = request_.parse(readBuff_);
+    // 【情况 1: 格式错误】 -> 返回 false (Bad Request)
+    if (!isValid) {
+        LOG_ERROR("Syntax Error");
+        response_.Init(srcDir, request_.path(), false, 400);; // 准备 400 页面
+    }
+    // 到了这里，说明 isValid == true，数据目前是合法的
+    // 接下来区分是“完事了”还是“还要等”
+    else if(request_.state() == HttpRequest::FINISH){
         // 解析成功 (200 OK)
         LOG_DEBUG("%s", request_.path().c_str());
         // 初始化响应：设置路径，状态码200
         response_.Init(srcDir, request_.path(), request_.IsKeepAlive(), 200);
     }else{
-        // 解析失败 (400 Bad Request)
-        response_.Init(srcDir, request_.path(), false, 400);
+        // 【情况 3: 解析未完】 -> Incomplete
+        // isValid 是 true，但 state 还没到 FINISH
+        return false; // 告诉 WebServer：别急，继续监听 EPOLLIN，等下一波数据
     }
 
     // 3. 生成响应头，写入 writeBuff_
