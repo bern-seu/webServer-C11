@@ -26,6 +26,7 @@ public:
         FINISH,
     };
 
+    // TODO: 目前HTTP_CODE没有使用，似乎默认的是认为请求是完整的
     enum HTTP_CODE{
         // （错误：重复定义）请求不完整，需继续接收数据
         NO_REQUEST = 0,

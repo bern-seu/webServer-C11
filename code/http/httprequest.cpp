@@ -99,7 +99,7 @@ void HttpRequest::ParseHeader_(const string& line){
         state_ = BODY;
     }
 }
-
+// TODO:解析请求体，可能要分情况，如果是上传文件呢？
 void HttpRequest::ParseBody_(const string& line){
     body_ = line;
     ParsePost_();
