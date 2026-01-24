@@ -1,8 +1,11 @@
+<<<<<<< HEAD
 /*
  * @Author       : mark
  * @Date         : 2020-06-15
  * @copyleft Apache 2.0
  */ 
+=======
+>>>>>>> dev
 
 #ifndef THREADPOOL_H
 #define THREADPOOL_H

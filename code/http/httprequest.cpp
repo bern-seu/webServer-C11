@@ -28,39 +28,55 @@ bool HttpRequest::IsKeepAlive() const{
 bool HttpRequest::parse(Buffer& buff){
     // HTTP协议的行分隔符（回车+换行）
     const char CRLF[] = "\r\n";
-    if(buff.ReadableBytes() <= 0){// 缓冲区无数据，直接返回解析失败
-        return false;
+    if(buff.ReadableBytes() <= 0){// 缓冲区无数据，直接返回
+        return true;
     }
+    // 定义最大行长度，例如 8KB (通常足够放下 URL 和大部分 Header), 超过这个长度还没换行，肯定是恶意攻击或错误
+    const size_t MAX_LINE_LEN = 8192;
     while(buff.ReadableBytes() && state_ != FINISH){
+        // 特殊处理 BODY：不找 CRLF，而是看 Content-Length
+        if (state_ == BODY) {
+            ParseBody_(buff); // 直接把 Buffer 传进去，而不是传 string line
+            // ParseBody_ 内部会判断数据够不够 Content-Length
+            // 如果够了，就设置 state_ = FINISH
+            // 如果不够，就 return，等待下一次数据
+            break; // Body 处理通常是一次性的或者流式的，处理完一轮就跳出
+        }
         //查找当前行的结束位置（CRLF）
         const char* lineEnd = search(buff.Peek(),buff.BeginWriteConst(),CRLF,CRLF + 2);
+        // 没找到 CRLF -> 说明行不完整 -> 退出等待更多数据
+        if(lineEnd == buff.BeginWrite()) { 
+            if (buff.ReadableBytes() > MAX_LINE_LEN) {
+                LOG_ERROR("Line too long! Potential buffer overflow attack.");
+                return false; // 直接判死刑：400 Bad Request
+            }
+            break; 
+        }
         //提取当前行的字符串（从可读起始到CRLF前）
         std::string line(buff.Peek(),lineEnd);
+        // 移动读指针（跳过当前行 + CRLF）
+        buff.RetrieveUntil(lineEnd + 2);
         //按当前状态处理行数据
         switch(state_)
         {
             case REQUEST_LINE:
-                if(!ParseRequestLine_(line)){// 解析请求行失败（格式错误）
+                if(!ParseRequestLine_(line)){// 解析请求行失败
                     return false;
                 }
                 ParsePath_();// 处理请求路径（如补全默认页面、转义特殊字符）
                 break;
             case HEADERS:
-                ParseHeader_(line); //解析头部行（如Host: localhost → 存入header_哈希表）
-                if(buff.ReadableBytes() <= 2){// 剩余数据≤2字节（仅存\r\n），说明头部解析完成
-                    state_ = FINISH;
+                if (line.empty()) { 
+                    state_ = BODY; 
+                    // 优化：如果是 GET 或 Content-Length=0，直接完成
+                    if(header_.count("Content-Length") == 0) { state_ = FINISH; }
+                    break;
                 }
-                break;
-            case BODY:
-                ParseBody_(line);// 解析请求体内容（POST请求的参数，如username=admin&pwd=123）
+                if(!ParseHeader_(line)) return false; // 【错误】Header 格式不对
                 break;
             default:
                 break;
         }
-        // 未找到CRLF（行不完整），跳出循环等待后续数据
-        if(lineEnd == buff.BeginWrite()) {break;}
-        // 移动读指针，跳过当前行及CRLF（\r\n占2字节）
-        buff.RetrieveUntil(lineEnd + 2);
     }
     LOG_DEBUG("[%s], [%s], [%s]", method_.c_str(), path_.c_str(), version_.c_str());
     return true;
@@ -89,22 +105,41 @@ bool HttpRequest::ParseRequestLine_(const string& line){
     return false;
 }
 
-void HttpRequest::ParseHeader_(const string& line){
-    regex patten("^([^:]*): ?(.*)$");
+bool HttpRequest::ParseHeader_(const string& line){
+    // 推荐使用更严谨的正则
+    regex patten("^([^:]+): ?(.*)$");
     smatch subMatch;
     if(regex_match(line,subMatch,patten)){
         header_[subMatch[1]] = subMatch[2];
+        return true;
     }
+    // 【关键】：匹配失败，进入这里
     else{
-        state_ = BODY;
+        LOG_ERROR("Header format error: %s", line.c_str());
+        return false; // 返回 false
     }
 }
+// TODO:解析请求体，可能要分情况，如果是上传文件呢？
+void HttpRequest::ParseBody_(Buffer& buff){
+    // 1. 获取 Body 长度
+    int contentLen = 0;
+    if(header_.count("Content-Length")) {
+        contentLen = stoi(header_["Content-Length"]);
+    }
 
-void HttpRequest::ParseBody_(const string& line){
-    body_ = line;
-    ParsePost_();
-    state_ = FINISH;
-    LOG_DEBUG("Body:%s, line:%d", line.c_str(), line.size());
+    // 2. 检查数据够不够
+    if(contentLen > 0) {
+        if(buff.ReadableBytes() >= contentLen) {
+            // 从当前读指针开始，拷贝 contentLen 个字节到 body_
+            body_ = buff.RetrieveToStr(contentLen);
+            state_ = FINISH;
+        }
+        // else: 数据不够，什么都不做，函数结束，外层 parse 返回 true
+        // 等待 Epoll 下次触发读取更多数据
+    } else {
+        // 没有 Content-Length，通常视为没有 Body
+        state_ = FINISH;
+    }
 }
 
 int HttpRequest::ConverHex(char ch){
@@ -267,4 +302,8 @@ std::string HttpRequest::GetPost(const char* key) const {
         return post_.find(key)->second;
     }
     return "";
+}
+
+HttpRequest::PARSE_STATE HttpRequest::state() const {
+    return state_;
 }

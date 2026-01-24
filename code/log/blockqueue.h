@@ -1,8 +1,12 @@
+<<<<<<< HEAD
 /*
  * @Author       : mark
  * @Date         : 2020-06-16
  * @copyleft Apache 2.0
  */ 
+=======
+
+>>>>>>> dev
 #ifndef BLOCKQUEUE_H
 #define BLOCKQUEUE_H
 

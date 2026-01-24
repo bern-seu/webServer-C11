@@ -1,0 +1,127 @@
+bool HttpConn::process() {
+    // ...
+    
+    // 1. 调用 parse
+    bool isValid = request_.parse(readBuff_);
+
+    // 【情况 1: 格式错误】 -> 返回 false (Bad Request)
+    if (!isValid) {
+        LOG_ERROR("Syntax Error");
+        response_.Init(..., 400); // 准备 400 页面
+        return true; // 虽然出错了，但处理流程结束了，需要通知 Epoll 写回 400 响应
+    }
+
+    // 到了这里，说明 isValid == true，数据目前是合法的
+    // 接下来区分是“完事了”还是“还要等”
+
+    // 【情况 2: 解析完成】 -> Success
+    if (request_.state() == HttpRequest::FINISH) {
+        LOG_INFO("Request Finished");
+        response_.Init(..., 200); // 准备 200 页面
+        return true; // 通知 Epoll 写回响应
+    }
+
+    // 【情况 3: 解析未完】 -> Incomplete
+    // isValid 是 true，但 state 还没到 FINISH
+    return false; // 告诉 WebServer：别急，继续监听 EPOLLIN，等下一波数据
+}
+bool HttpRequest::parse(Buffer& buff) {
+    const char CRLF[] = "\r\n";
+    // 定义最大行长度，例如 8KB (通常足够放下 URL 和大部分 Header)
+    // 超过这个长度还没换行，肯定是恶意攻击或错误
+    const size_t MAX_LINE_LEN = 8192;
+    if(buff.ReadableBytes() <= 0) return false;
+
+    // 循环条件：还有数据 且 没解析完
+    while(buff.ReadableBytes() && state_ != FINISH) {
+        
+        // ==========================================
+        // 特殊处理 BODY：不找 CRLF，而是看 Content-Length
+        // ==========================================
+        if (state_ == BODY) {
+            ParseBody_(buff); // 直接把 Buffer 传进去，而不是传 string line
+            // ParseBody_ 内部会判断数据够不够 Content-Length
+            // 如果够了，就设置 state_ = FINISH
+            // 如果不够，就 return，等待下一次数据
+            break; // Body 处理通常是一次性的或者流式的，处理完一轮就跳出
+        }
+
+        // ==========================================
+        // 处理 LINE 和 HEADERS：必须找 CRLF
+        // ==========================================
+        const char* lineEnd = search(buff.Peek(), buff.BeginWriteConst(), CRLF, CRLF + 2);
+        
+        // 没找到 CRLF -> 说明行不完整 -> 退出等待更多数据
+        if(lineEnd == buff.BeginWrite()) { 
+            if (buff.ReadableBytes() > MAX_LINE_LEN) {
+                LOG_ERROR("Line too long! Potential buffer overflow attack.");
+                return false; // 直接判死刑：400 Bad Request
+            }
+            break; 
+        }
+        
+        std::string line(buff.Peek(), lineEnd);
+        
+        // 移动读指针（跳过当前行 + CRLF）
+        buff.RetrieveUntil(lineEnd + 2);
+
+        switch(state_) {
+            case REQUEST_LINE:
+                if(!ParseRequestLine_(line)) return false;
+                ParsePath_();
+                break;
+                
+            case HEADERS:
+                if (line.empty()) { 
+                    state_ = BODY; 
+                    // 优化：如果是 GET 或 Content-Length=0，直接完成
+                    if(header_.count("Content-Length") == 0) { state_ = FINISH; }
+                    break;
+                }
+                if(!ParseHeader_(line)) return false; // 【错误】Header 格式不对
+                break;
+                
+            default:
+                break;
+        }
+    }
+    ...
+    return true;
+}
+
+void HttpRequest::ParseBody_(Buffer& buff) {
+    // 1. 获取 Body 长度
+    int contentLen = 0;
+    if(header_.count("Content-Length")) {
+        contentLen = stoi(header_["Content-Length"]);
+    }
+
+    // 2. 检查数据够不够
+    if(contentLen > 0) {
+        if(buff.ReadableBytes() >= contentLen) {
+            // 数据够了，全部读出来
+            body_ = buff.RetrieveAllToStr(); // 或者只读 contentLen 长度
+            state_ = FINISH;
+        }
+        // else: 数据不够，什么都不做，函数结束，外层 parse 返回 true
+        // 等待 Epoll 下次触发读取更多数据
+    } else {
+        // 没有 Content-Length，通常视为没有 Body
+        state_ = FINISH;
+    }
+}
+
+void HttpRequest::ParseHeader_(const string& line){
+    // 推荐使用更严谨的正则
+    regex patten("^([^:]+): ?(.*)$");
+    smatch subMatch;
+    if(regex_match(line,subMatch,patten)){
+        header_[subMatch[1]] = subMatch[2];
+        return true;
+    }
+    // 【关键】：匹配失败，进入这里
+    else{
+        LOG_ERROR("Header format error: %s", line.c_str());
+        return false; // 返回 false
+    }
+}

@@ -151,7 +151,11 @@ void Log::flush() {
 void Log::AsyncWrite_() {
     string str = "";
     while(deque_->pop(str)) {
+<<<<<<< HEAD
         lock_guard<mutex> locker(mtx_);
+=======
+        //lock_guard<mutex> locker(mtx_);
+>>>>>>> dev
         fputs(str.c_str(), fp_);
     }
 }

@@ -63,6 +63,8 @@ public:
     std::string GetPost(const std::string& key) const;
     std::string GetPost(const char* key) const;
 
+    PARSE_STATE state() const;
+
     //判断是否为长连接
     bool IsKeepAlive() const;
 
@@ -70,9 +72,9 @@ private:
     //解析请求行（提取方法、路径、版本）
     bool ParseRequestLine_(const std::string& line);
     //解析请求头部（存入header_哈希表）
-    void ParseHeader_(const std::string& line);
+    bool ParseHeader_(const std::string& line);
     //解析请求主体（POST 参数存入body_）
-    void ParseBody_(const std::string& line);
+    void ParseBody_(Buffer& buff);
 
     //处理请求路径（如补全默认页面/→/index.html）
     void ParsePath_();

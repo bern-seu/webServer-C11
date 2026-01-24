@@ -1,9 +1,5 @@
-/*
- * @Author       : mark
- * @Date         : 2020-06-26
- * @copyleft Apache 2.0
- */ 
 
+// TODO: buffer现在采取扩容的方法，该方法适用于小文件，对于大文件，应该用排空的方法，一旦 Buffer 里有数据，马上写入硬盘（或者丢弃），然后立刻重置 Buffer 指针 (RetrieveAll)。
 #ifndef BUFFER_H
 #define BUFFER_H
 #include <cstring>   //perror
@@ -31,6 +27,7 @@ public:
 
     void RetrieveAll() ;
     std::string RetrieveAllToStr();
+    std::string RetrieveToStr(size_t len);
 
     const char* BeginWriteConst() const;
     char* BeginWrite();

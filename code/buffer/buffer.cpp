@@ -1,8 +1,3 @@
-/*
- * @Author       : mark
- * @Date         : 2020-06-26
- * @copyleft Apache 2.0
- */ 
 #include "buffer.h"
 
 Buffer::Buffer(int initBuffSize) : buffer_(initBuffSize), readPos_(0), writePos_(0) {}
@@ -41,6 +36,13 @@ void Buffer::RetrieveAll() {
 std::string Buffer::RetrieveAllToStr() {
     std::string str(Peek(), ReadableBytes());
     RetrieveAll();
+    return str;
+}
+
+std::string Buffer::RetrieveToStr(size_t len) {
+    assert(len <= ReadableBytes());
+    std::string str(Peek(), len); // 拷贝 len 长度
+    Retrieve(len);                // 移动读指针
     return str;
 }
 
