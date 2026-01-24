@@ -97,7 +97,6 @@ ssize_t HttpConn::write(int* saveErrno){
 }
 
 bool HttpConn::process(){
-    request_.Init(); // 重置解析器状态
     // 1. 如果读缓冲区没数据，没法处理
     if(readBuff_.ReadableBytes() <= 0){
         return false;
@@ -136,5 +135,6 @@ bool HttpConn::process(){
         iovCnt_ = 2;
     }
     LOG_DEBUG("filesize:%d, %d to %d", response_.FileLen(), iovCnt_, ToWriteBytes());
+    request_.Init();
     return true;
 }
