@@ -1,4 +1,4 @@
-# Install script for directory: /home/wbw/webServer-C11/code/buffer
+# Install script for directory: /home/wbw/Myproject/webServer-C11/code/buffer
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/g++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/wbw/webServer-C11/code/buffer -I/home/wbw/webServer-C11/code/http -I/home/wbw/webServer-C11/code/log -I/home/wbw/webServer-C11/code/pool -I/home/wbw/webServer-C11/code/server -I/home/wbw/webServer-C11/code/timer
+CXX_INCLUDES = -I/home/wbw/Myproject/webServer-C11/code/buffer -I/home/wbw/Myproject/webServer-C11/code/http -I/home/wbw/Myproject/webServer-C11/code/log -I/home/wbw/Myproject/webServer-C11/code/pool -I/home/wbw/Myproject/webServer-C11/code/server -I/home/wbw/Myproject/webServer-C11/code/timer
 
 CXX_FLAGS = -g
 

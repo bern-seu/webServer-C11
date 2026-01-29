@@ -1,4 +1,4 @@
-# Install script for directory: /home/wbw/webServer-C11/code
+# Install script for directory: /home/wbw/Myproject/webServer-C11/code
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,31 +44,31 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/wbw/webServer-C11/build/code/buffer/cmake_install.cmake")
+  include("/home/wbw/Myproject/webServer-C11/build/code/buffer/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/wbw/webServer-C11/build/code/http/cmake_install.cmake")
+  include("/home/wbw/Myproject/webServer-C11/build/code/http/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/wbw/webServer-C11/build/code/log/cmake_install.cmake")
+  include("/home/wbw/Myproject/webServer-C11/build/code/log/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/wbw/webServer-C11/build/code/pool/cmake_install.cmake")
+  include("/home/wbw/Myproject/webServer-C11/build/code/pool/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/wbw/webServer-C11/build/code/server/cmake_install.cmake")
+  include("/home/wbw/Myproject/webServer-C11/build/code/server/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/wbw/webServer-C11/build/code/timer/cmake_install.cmake")
+  include("/home/wbw/Myproject/webServer-C11/build/code/timer/cmake_install.cmake")
 endif()
 

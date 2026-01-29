@@ -1,4 +1,4 @@
-# Install script for directory: /home/wbw/webServer-C11/code/timer
+# Install script for directory: /home/wbw/Myproject/webServer-C11/code/timer
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

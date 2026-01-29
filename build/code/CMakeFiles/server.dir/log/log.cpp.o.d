@@ -1,7 +1,9 @@
 code/CMakeFiles/server.dir/log/log.cpp.o: \
- /home/wbw/webServer-C11/code/log/log.cpp /usr/include/stdc-predef.h \
- /home/wbw/webServer-C11/code/log/log.h /usr/include/c++/11/mutex \
- /usr/include/c++/11/tuple /usr/include/c++/11/utility \
+ /home/wbw/Myproject/webServer-C11/code/log/log.cpp \
+ /usr/include/stdc-predef.h \
+ /home/wbw/Myproject/webServer-C11/code/log/log.h \
+ /usr/include/c++/11/mutex /usr/include/c++/11/tuple \
+ /usr/include/c++/11/utility \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -159,8 +161,8 @@ code/CMakeFiles/server.dir/log/log.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/statx-generic.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h \
- /home/wbw/webServer-C11/code/log/blockqueue.h /usr/include/c++/11/deque \
- /usr/include/c++/11/bits/stl_uninitialized.h \
+ /home/wbw/Myproject/webServer-C11/code/log/blockqueue.h \
+ /usr/include/c++/11/deque /usr/include/c++/11/bits/stl_uninitialized.h \
  /usr/include/c++/11/bits/stl_deque.h /usr/include/c++/11/bits/deque.tcc \
  /usr/include/c++/11/condition_variable \
  /usr/include/c++/11/bits/shared_ptr.h \
@@ -168,7 +170,7 @@ code/CMakeFiles/server.dir/log/log.cpp.o: \
  /usr/include/c++/11/bits/allocated_ptr.h \
  /usr/include/c++/11/ext/aligned_buffer.h \
  /usr/include/c++/11/ext/concurrence.h \
- /home/wbw/webServer-C11/code/log/../buffer/buffer.h \
+ /home/wbw/Myproject/webServer-C11/code/log/../buffer/buffer.h \
  /usr/include/c++/11/cstring /usr/include/c++/11/iostream \
  /usr/include/c++/11/ostream /usr/include/c++/11/ios \
  /usr/include/c++/11/bits/ios_base.h \

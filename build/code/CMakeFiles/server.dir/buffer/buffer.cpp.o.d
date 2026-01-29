@@ -1,6 +1,7 @@
 code/CMakeFiles/server.dir/buffer/buffer.cpp.o: \
- /home/wbw/webServer-C11/code/buffer/buffer.cpp \
- /usr/include/stdc-predef.h /home/wbw/webServer-C11/code/buffer/buffer.h \
+ /home/wbw/Myproject/webServer-C11/code/buffer/buffer.cpp \
+ /usr/include/stdc-predef.h \
+ /home/wbw/Myproject/webServer-C11/code/buffer/buffer.h \
  /usr/include/c++/11/cstring \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
