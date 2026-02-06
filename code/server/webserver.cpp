@@ -12,7 +12,7 @@ timer_(new HeapTimer()), threadpool_(new ThreadPool(threadNum)), epoller_(new Ep
 {
     srcDir_ = getcwd(nullptr, 256); // 获取当前工作目录的绝对路径, 当第一个参数传 nullptr 时，getcwd 函数内部会调用 malloc 在堆上分配内存来存储路径字符串。
     assert(srcDir_);
-    strncat(srcDir_, "/resources/", 16);// 拼接上资源文件夹名
+    strncat(srcDir_, "../resources/", 16);// 拼接上资源文件夹名
     HttpConn::userCount = 0;    // 计数器归零
     HttpConn::srcDir = srcDir_; // 将路径共享给所有的 HttpConn 对象
     // 初始化数据库连接池 (单例模式)
